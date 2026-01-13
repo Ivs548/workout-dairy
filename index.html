@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <title>🏋️ Дневник тренировок</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+    <div class="container">
+        <h1><i class="fas fa-dumbbell"></i> Дневник тренировок</h1>
+        
+        <div class="tabs">
+            <button class="tab active" data-tab="exercises">Упражнения</button>
+            <button class="tab" data-tab="workouts">Тренировки</button>
+            <button class="tab" data-tab="stats">Статистика</button>
+        </div>
+        
+        <div class="tab-content active" id="exercises-tab">
+            <div class="card">
+                <h2><i class="fas fa-plus-circle"></i> Новое упражнение</h2>
+                <input type="text" id="exercise-name" placeholder="Название упражнения">
+                <select id="exercise-category">
+                    <option value="Силовые">Силовые</option>
+                    <option value="Кардио">Кардио</option>
+                    <option value="Растяжка">Растяжка</option>
+                    <option value="Другое">Другое</option>
+                </select>
+                <button onclick="addExercise()" class="btn-primary">
+                    <i class="fas fa-save"></i> Сохранить упражнение
+                </button>
+            </div>
+            
+            <div class="card">
+                <h2><i class="fas fa-list"></i> Мои упражнения</h2>
+                <div id="exercises-list"></div>
+            </div>
+        </div>
+        
+        <div class="tab-content" id="workouts-tab">
+            <div class="card">
+                <h2><i class="fas fa-running"></i> Новая тренировка</h2>
+                <select id="workout-exercise">
+                    <option value="">Выберите упражнение</option>
+                </select>
+                <input type="date" id="workout-date">
+                <input type="number" id="workout-sets" placeholder="Подходы" min="1">
+                <input type="number" id="workout-reps" placeholder="Повторения" min="1">
+                <input type="number" id="workout-weight" placeholder="Вес (кг)" step="0.5">
+                <button onclick="addWorkout()" class="btn-primary">
+                    <i class="fas fa-plus"></i> Добавить тренировку
+                </button>
+            </div>
+            
+            <div class="card">
+                <h2><i class="fas fa-history"></i> История тренировок</h2>
+                <div id="workouts-list"></div>
+            </div>
+        </div>
+        
+        <div class="tab-content" id="stats-tab">
+            <div class="card">
+                <h2><i class="fas fa-chart-line"></i> Статистика</h2>
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <div class="stat-value" id="total-exercises">0</div>
+                        <div class="stat-label">Упражнений</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-value" id="total-workouts">0</div>
+                        <div class="stat-label">Тренировок</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-value" id="total-weight">0</div>
+                        <div class="stat-label">Общий вес (кг)</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-value" id="last-workout">-</div>
+                        <div class="stat-label">Последняя тренировка</div>
+                    </div>
+                </div>
+                
+                <div class="progress-chart">
+                    <h3><i class="fas fa-chart-bar"></i> Прогресс за месяц</h3>
+                    <canvas id="progressChart"></canvas>
+                </div>
+            </div>
+        </div>
+        
+        <div class="install-hint">
+            <p><i class="fas fa-mobile-alt"></i> <strong>Чтобы установить на iPhone:</strong></p>
+            <p>1. Нажмите <i class="fas fa-share-square"></i> в Safari</p>
+            <p>2. Выберите "На экран «Домой»"</p>
+            <p>3. Нажмите "Добавить"</p>
+        </div>
+    </div>
+    
+    <script src="app.js"></script>
+</body>
+</html>

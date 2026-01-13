@@ -1,3 +1,339 @@
+   <!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <title>🏋️ Дневник тренировок</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            background: linear-gradient(135deg, #f0f9f0 0%, #d1f2d1 100%);
+            color: #1a472a;
+            padding: 10px;
+            min-height: 100vh;
+        }
+        
+        .header {
+            text-align: center;
+            margin-bottom: 10px;
+        }
+        
+        .header h1 {
+            font-size: 1.5em;
+            color: #1a472a;
+            margin-bottom: 15px;
+        }
+        
+        /* Категории упражнений - ПЕРВЫЙ БЛОК */
+        .categories-grid {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            margin-bottom: 15px;
+        }
+        
+        .category-card {
+            background: white;
+            border-radius: 10px;
+            padding: 10px 15px;
+            display: flex;
+            align-items: center;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+            cursor: pointer;
+            transition: all 0.3s;
+            border-left: 4px solid transparent;
+            position: relative;
+        }
+        
+        .category-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.12);
+        }
+        
+        .category-card.expanded {
+            margin-bottom: 0;
+            border-bottom-left-radius: 0;
+            border-bottom-right-radius: 0;
+        }
+        
+        .category-icon {
+            font-size: 1.2em;
+            color: #27ae60;
+            margin-right: 10px;
+            width: 30px;
+            text-align: center;
+        }
+        
+        .category-name {
+            font-size: 0.9em;
+            font-weight: 600;
+            flex-grow: 1;
+        }
+        
+        .category-count {
+            font-size: 0.8em;
+            color: #7f8c8d;
+            background: #f8f9fa;
+            padding: 2px 8px;
+            border-radius: 10px;
+        }
+        
+        .category-arrow {
+            color: #7f8c8d;
+            font-size: 0.9em;
+            margin-left: 8px;
+            transition: transform 0.3s;
+        }
+        
+        .category-card.expanded .category-arrow {
+            transform: rotate(180deg);
+        }
+        
+        /* Список упражнений категории */
+        .category-exercises {
+            background: #f8f9fa;
+            border-radius: 0 0 10px 10px;
+            margin-top: -2px;
+            padding: 10px;
+            display: none;
+            flex-direction: column;
+            gap: 8px;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.05);
+        }
+        
+        .category-exercises.show {
+            display: flex;
+        }
+        
+        .category-exercise-item {
+            background: white;
+            border-radius: 8px;
+            padding: 10px 15px;
+            display: flex;
+            align-items: center;
+            cursor: pointer;
+            transition: all 0.3s;
+            border-left: 3px solid #27ae60;
+        }
+        
+        .category-exercise-item:hover {
+            transform: translateX(5px);
+            box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+        }
+        
+        .category-exercise-name {
+            font-size: 0.9em;
+            font-weight: 500;
+            flex-grow: 1;
+        }
+        
+        .category-exercise-stats {
+            font-size: 0.8em;
+            color: #7f8c8d;
+            background: #f8f9fa;
+            padding: 2px 8px;
+            border-radius: 10px;
+        }
+        
+        /* Навигация - ВТОРОЙ БЛОК */
+        .tabs {
+            display: flex;
+            justify-content: space-around;
+            margin-bottom: 15px;
+            background: white;
+            padding: 8px;
+            border-radius: 15px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+        }
+        
+        .tab {
+            width: 45px;
+            height: 45px;
+            border-radius: 10px;
+            border: none;
+            background: #f8f9fa;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.2em;
+            color: #7f8c8d;
+            transition: all 0.3s;
+        }
+        
+        .tab.active {
+            background: linear-gradient(135deg, #27ae60 0%, #2ecc71 100%);
+            color: white;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 15px rgba(39, 174, 96, 0.3);
+        }
+        
+        /* Контент вкладок - ТРЕТИЙ БЛОК (под кнопками) */
+        .tab-content {
+            display: none;
+            margin-bottom: 15px;
+        }
+        
+        .tab-content.active {
+            display: block;
+        }
+        
+        /* Календарь - ЧЕТВЕРТЫЙ БЛОК (под контентом вкладок) */
+        .calendar-section {
+            margin-bottom: 15px;
+        }
+        
+        .calendar-nav {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+        
+        .calendar-title {
+            font-weight: 600;
+            font-size: 1em;
+        }
+        
+        .calendar-arrow {
+            background: white;
+            border: none;
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            cursor: pointer;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            color: #27ae60;
+        }
+        
+        .calendar {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            gap: 3px;
+            background: white;
+            padding: 10px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+        }
+        
+        .calendar-header {
+            text-align: center;
+            font-size: 0.8em;
+            color: #7f8c8d;
+            padding: 5px 0;
+        }
+        
+        .calendar-day {
+            aspect-ratio: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.9em;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        
+        .calendar-day.has-workout {
+            background: #27ae60;
+            color: white;
+            font-weight: bold;
+        }
+        
+        .calendar-day.selected {
+            background: #2ecc71;
+            color: white;
+            box-shadow: 0 0 0 2px rgba(46, 204, 113, 0.3);
+        }
+        
+        .calendar-day.empty {
+            background: transparent;
+            cursor: default;
+        }
+        
+        /* Формы */
+        .form-card {
+            background: white;
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 15px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+        }
+        
+        .form-card h2 {
+            margin-bottom: 15px;
+            color: #1a472a;
+            font-size: 1.2em;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .form-group {
+            margin-bottom: 12px;
+        }
+        
+        input, select, textarea {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 0.95em;
+            transition: border 0.3s;
+            font-family: inherit;
+        }
+        
+        input:focus, select:focus, textarea:focus {
+            border-color: #27ae60;
+            outline: none;
+        }
+        
+        input[type="date"] {
+            font-size: 0.95em;
+            min-height: 44px;
+        }
+        
+        .compact-input {
+            font-size: 0.9em;
+            padding: 10px;
+        }
+        
+        .cardio-inputs, .standard-inputs {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 8px;
+        }
+        
+        .hidden-field {
+            display: none;
+        }
+        
+        .btn-primary {
+            background: linear-gradient(135deg, #27ae60 0%, #2ecc71 100%);
+            color: white;
+            border: none;
+            padding: 14px;
+            border-radius: 8px;
+            font-size: 1em;
+            font-weight: 600;
+            cursor: pointer;
+            width: 100%;
+            transition: transform 0.2s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+        
         .btn-primary:active {
             transform: scale(0.98);
         }
@@ -33,23 +369,6 @@
             padding: 5px;
             border-radius: 5px;
             transition: all 0.2s;
-        }
-        
-        .workout-dropdown-menu {
-            position: absolute;
-            top: 40px;
-            right: 15px;
-            background: white;
-            border-radius: 10px;
-            box-shadow: 0 5px 20px rgba(0,0,0,0.15);
-            z-index: 100;
-            min-width: 100px;
-            display: none;
-            overflow: hidden;
-        }
-        
-        .workout-dropdown-menu.show {
-            display: block;
         }
         
         .workout-stats {
@@ -112,106 +431,7 @@
             margin-top: 3px;
         }
         
-        /* История тренировок с графиком */
-        .workout-history-item {
-            background: #f8f9fa;
-            border-radius: 10px;
-            padding: 15px;
-            margin: 8px 0;
-            border-left: 4px solid #27ae60;
-        }
-        
-        .workout-history-chart {
-            height: 40px;
-            position: relative;
-            margin-top: 15px;
-            background: white;
-            border-radius: 6px;
-            padding: 5px;
-        }
-        
-        .history-chart-line {
-            position: absolute;
-            top: 50%;
-            left: 5px;
-            right: 5px;
-            height: 2px;
-            background: #27ae60;
-            transform: translateY(-50%);
-        }
-        
-        .history-chart-point {
-            position: absolute;
-            width: 6px;
-            height: 6px;
-            background: #2ecc71;
-            border-radius: 50%;
-            border: 2px solid white;
-            transform: translate(-50%, -50%);
-            box-shadow: 0 1px 3px rgba(0,0,0,0.2);
-        }
-        
-        /* Модальные окна */
-        .modal {
-            display: none;
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0,0,0,0.5);
-            z-index: 1000;
-            align-items: center;
-            justify-content: center;
-        }
-        
-        .modal.active {
-            display: flex;
-        }
-        
-        .modal-content {
-            background: white;
-            border-radius: 15px;
-            padding: 25px;
-            width: 90%;
-            max-width: 400px;
-            max-height: 80vh;
-            overflow-y: auto;
-        }
-        
-        .modal-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 20px;
-        }
-        
-        .close-modal {
-            background: none;
-            border: none;
-            font-size: 1.5em;
-            cursor: pointer;
-            color: #7f8c8d;
-        }
-        
-        .form-actions {
-            display: flex;
-            gap: 10px;
-            margin-top: 20px;
-        }
-        
-        .btn-secondary {
-            background: #95a5a6;
-            color: white;
-            border: none;
-            padding: 12px;
-            border-radius: 8px;
-            font-size: 1em;
-            cursor: pointer;
-            flex: 1;
-        }
-        
-        /* День тренировок */
+        /* Тренировки выбранного дня - ПОД КАЛЕНДАРЕМ */
         .day-workouts {
             margin-top: 15px;
         }
@@ -239,7 +459,7 @@
             font-size: 0.9em;
         }
         
-        /* Резервное копирование */
+        /* Резервное копирование - ПОСЛЕДНИЙ БЛОК */
         .backup-section {
             background: white;
             border-radius: 12px;
@@ -336,17 +556,73 @@
             border-left: 4px solid #3498db;
         }
         
-        /* Пустое состояние */
-        .empty-state {
-            text-align: center;
-            padding: 40px 20px;
+        /* Модальные окна */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.5);
+            z-index: 1000;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .modal.active {
+            display: flex;
+        }
+        
+        .modal-content {
+            background: white;
+            border-radius: 15px;
+            padding: 25px;
+            width: 90%;
+            max-width: 400px;
+            max-height: 80vh;
+            overflow-y: auto;
+        }
+        
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+        
+        .close-modal {
+            background: none;
+            border: none;
+            font-size: 1.5em;
+            cursor: pointer;
             color: #7f8c8d;
         }
         
-        .empty-state i {
-            font-size: 3em;
-            margin-bottom: 15px;
-            opacity: 0.5;
+        .form-actions {
+            display: flex;
+            gap: 10px;
+            margin-top: 20px;
+        }
+        
+        .btn-secondary {
+            background: #95a5a6;
+            color: white;
+            border: none;
+            padding: 12px;
+            border-radius: 8px;
+            font-size: 1em;
+            cursor: pointer;
+            flex: 1;
+        }
+        
+        /* Индикатор выбора упражнения */
+        .selected-exercise-indicator {
+            background: #eafaf1;
+            border-radius: 10px;
+            padding: 10px;
+            margin: 10px 0;
+            border-left: 4px solid #27ae60;
         }
         
         /* Меню упражнения */
@@ -407,13 +683,17 @@
             color: #27ae60;
         }
         
-        /* Индикатор выбора упражнения */
-        .selected-exercise-indicator {
-            background: #eafaf1;
-            border-radius: 10px;
-            padding: 10px;
-            margin: 10px 0;
-            border-left: 4px solid #27ae60;
+        /* Пустое состояние */
+        .empty-state {
+            text-align: center;
+            padding: 40px 20px;
+            color: #7f8c8d;
+        }
+        
+        .empty-state i {
+            font-size: 3em;
+            margin-bottom: 15px;
+            opacity: 0.5;
         }
         
         /* Адаптивность */
@@ -446,32 +726,15 @@
     </style>
 </head>
 <body>
-    <!-- Заголовок -->
+    <!-- 1. Заголовок -->
     <div class="header">
         <h1>🏋️ Дневник тренировок</h1>
     </div>
     
-    <!-- Категории упражнений -->
+    <!-- 2. Категории упражнений -->
     <div id="categories-container" class="categories-grid"></div>
     
-    <!-- Календарь - всегда видимый -->
-    <div class="calendar-section">
-        <div class="calendar-nav">
-            <button class="calendar-arrow" id="prev-month">
-                <i class="fas fa-chevron-left"></i>
-            </button>
-            <div class="calendar-title" id="calendar-title"></div>
-            <button class="calendar-arrow" id="next-month">
-                <i class="fas fa-chevron-right"></i>
-            </button>
-        </div>
-        <div class="calendar" id="calendar"></div>
-    </div>
-    
-    <!-- Тренировки выбранного дня -->
-    <div id="selected-day-workouts" class="day-workouts"></div>
-    
-    <!-- Навигация -->
+    <!-- 3. Навигация -->
     <div class="tabs">
         <button class="tab active" data-tab="home" title="Главная">
             <i class="fas fa-home"></i>
@@ -487,14 +750,37 @@
         </button>
     </div>
     
+    <!-- 4. Контент вкладок (под кнопками навигации) -->
+    
     <!-- Главная страница -->
     <div class="tab-content active" id="home-tab">
-        <div id="home-content"></div>
+        <div class="form-card">
+            <h2><i class="fas fa-home"></i> Добро пожаловать в Дневник тренировок</h2>
+            <p style="margin-bottom: 15px; color: #7f8c8d;">Здесь вы можете отслеживать свои тренировки, добавлять упражнения и анализировать прогресс.</p>
+            
+            <div class="stats-grid">
+                <div class="stat-card-compact">
+                    <div class="stat-value-compact" id="welcome-total-exercises">0</div>
+                    <div class="stat-label-compact">Всего упражнений</div>
+                </div>
+                <div class="stat-card-compact">
+                    <div class="stat-value-compact" id="welcome-total-workouts">0</div>
+                    <div class="stat-label-compact">Тренировок</div>
+                </div>
+                <div class="stat-card-compact">
+                    <div class="stat-value-compact" id="welcome-this-week">0</div>
+                    <div class="stat-label-compact">На этой неделе</div>
+                </div>
+                <div class="stat-card-compact">
+                    <div class="stat-value-compact" id="welcome-last-workout">-</div>
+                    <div class="stat-label-compact">Последняя тренировка</div>
+                </div>
+            </div>
+        </div>
     </div>
     
     <!-- Вкладка каталога упражнений -->
     <div class="tab-content" id="catalog-tab">
-        <!-- Форма добавления упражнения -->
         <div class="form-card">
             <h2><i class="fas fa-plus-circle"></i> Новое упражнение</h2>
             <div class="form-group">
@@ -520,11 +806,9 @@
     
     <!-- Вкладка тренировок -->
     <div class="tab-content" id="workouts-tab">
-        <!-- Форма добавления тренировки -->
         <div class="form-card" id="workout-form-card">
             <h2><i class="fas fa-running"></i> Новая тренировка</h2>
             
-            <!-- Индикатор выбранного упражнения -->
             <div id="selected-exercise-indicator" class="selected-exercise-indicator" style="display: none;">
                 <div style="font-weight: 600; color: #1a472a;" id="selected-exercise-name"></div>
                 <div style="font-size: 0.9em; color: #7f8c8d;" id="selected-exercise-category"></div>
@@ -539,10 +823,9 @@
                 <input type="date" id="workout-date" class="compact-input">
             </div>
             
-            <!-- Стандартные поля -->
             <div id="standard-fields" class="standard-inputs">
                 <div class="form-group">
-                    <input type="number" id="weight" placeholder="Вес (кг)" step="0.5" class="compact-input">
+                    <input type="number" id="weight" placeholder="Вес (кг)" step="0.5" min="0" class="compact-input">
                 </div>
                 <div class="form-group">
                     <input type="number" id="reps" placeholder="Повторения" min="1" class="compact-input">
@@ -552,16 +835,15 @@
                 </div>
             </div>
             
-            <!-- Поля для кардио -->
             <div id="cardio-fields" class="cardio-inputs hidden-field">
                 <div class="form-group">
-                    <input type="number" id="level" placeholder="Уровень" step="0.1" min="0" class="compact-input">
+                    <input type="number" id="level" placeholder="Уровень*" step="0.1" min="0" class="compact-input" required>
                 </div>
                 <div class="form-group">
-                    <input type="number" id="distance" placeholder="Расстояние (км, необяз.)" step="0.1" min="0" class="compact-input">
+                    <input type="number" id="distance" placeholder="Расстояние (км)" step="0.1" min="0" class="compact-input">
                 </div>
                 <div class="form-group">
-                    <input type="number" id="time" placeholder="Время (мин, необяз.)" step="1" min="0" class="compact-input">
+                    <input type="number" id="time" placeholder="Время (мин)" step="1" min="0" class="compact-input">
                 </div>
             </div>
             
@@ -572,12 +854,16 @@
             <button onclick="addWorkout()" class="btn-primary">
                 <i class="fas fa-save"></i> Сохранить тренировку
             </button>
+            <div style="font-size: 0.8em; color: #7f8c8d; margin-top: 10px; text-align: center;">
+                * - обязательное поле для кардио
+            </div>
         </div>
         
-        <!-- История тренировок выбранного упражнения -->
         <div class="form-card">
             <h2><i class="fas fa-history"></i> История упражнения</h2>
-            <div id="exercise-history-container"></div>
+            <div id="exercise-history-container">
+                <p style="text-align: center; color: #7f8c8d;">Выберите упражнение для просмотра истории</p>
+            </div>
         </div>
     </div>
     
@@ -608,7 +894,24 @@
         </div>
     </div>
     
-    <!-- Резервное копирование -->
+    <!-- 5. Календарь (под контентом вкладок) -->
+    <div class="calendar-section">
+        <div class="calendar-nav">
+            <button class="calendar-arrow" id="prev-month">
+                <i class="fas fa-chevron-left"></i>
+            </button>
+            <div class="calendar-title" id="calendar-title"></div>
+            <button class="calendar-arrow" id="next-month">
+                <i class="fas fa-chevron-right"></i>
+            </button>
+        </div>
+        <div class="calendar" id="calendar"></div>
+    </div>
+    
+    <!-- 6. Тренировки выбранного дня (под календарем) -->
+    <div id="selected-day-workouts" class="day-workouts"></div>
+    
+    <!-- 7. Резервное копирование (самый нижний блок) -->
     <div class="backup-section">
         <h3><i class="fas fa-database"></i> Резервное копирование</h3>
         <div class="backup-buttons">
@@ -624,7 +927,7 @@
         </div>
     </div>
     
-    <!-- Модальные окна -->
+    <!-- Модальное окно для редактирования упражнения -->
     <div class="modal" id="exercise-modal">
         <div class="modal-content">
             <div class="modal-header">
@@ -691,6 +994,7 @@
             loadCategories();
             updateExerciseDropdown();
             updateStats();
+            updateWelcomeStats();
             
             // Инициализируем календарь
             initCalendar();
@@ -703,9 +1007,6 @@
             
             // Обновляем информацию о резервной копии
             updateBackupInfo();
-            
-            // Загружаем историю тренировок
-            loadExerciseHistory();
         });
 
         // Форматирование даты для input type="date"
@@ -737,8 +1038,10 @@
                     this.classList.add('active');
                     document.getElementById(`${tabId}-tab`).classList.add('active');
                     
-                    // Календарь всегда видим
-                    document.querySelector('.calendar-section').style.display = 'block';
+                    // Обновляем статистику для главной страницы
+                    if (tabId === 'home') {
+                        updateWelcomeStats();
+                    }
                     
                     // Загружаем историю тренировок при открытии вкладки тренировок
                     if (tabId === 'workouts') {
@@ -829,12 +1132,10 @@
             if (expandedCategories.has(categoryId)) {
                 expandedCategories.delete(categoryId);
             } else {
-                // Скрываем другие открытые категории
                 expandedCategories.clear();
                 expandedCategories.add(categoryId);
             }
             
-            // Обновляем отображение
             loadCategories();
         }
 
@@ -853,12 +1154,10 @@
                 const exerciseElement = document.createElement('div');
                 exerciseElement.className = 'category-exercise-item';
                 
-                // Получаем последнюю тренировку для этого упражнения
                 const latestWorkout = workouts
                     .filter(w => w.exerciseId === exercise.id)
                     .sort((a, b) => new Date(b.date) - new Date(a.date))[0];
                 
-                // Создаем статистику для отображения
                 let statsText = 'Нет данных';
                 if (latestWorkout) {
                     if (exercise.category === 'Кардио') {
@@ -879,7 +1178,6 @@
                     <div class="category-exercise-stats">${statsText}</div>
                 `;
                 
-                // Добавляем меню с тремя точками
                 const moreBtn = document.createElement('button');
                 moreBtn.className = 'more-btn';
                 moreBtn.innerHTML = '⋯';
@@ -891,7 +1189,6 @@
                 
                 exerciseElement.appendChild(moreBtn);
                 
-                // Добавляем выпадающее меню
                 const dropdown = document.createElement('div');
                 dropdown.className = 'dropdown-menu';
                 dropdown.id = `category-dropdown-${exercise.id}`;
@@ -903,7 +1200,6 @@
                 
                 exerciseElement.appendChild(dropdown);
                 
-                // Обработчик клика на упражнение
                 exerciseElement.addEventListener('click', (e) => {
                     if (!e.target.closest('.more-btn')) {
                         openNewWorkoutWithExercise(exercise.id);
@@ -919,8 +1215,7 @@
             event.stopPropagation();
             const dropdown = document.getElementById(`category-dropdown-${exerciseId}`);
             
-            // Закрываем другие меню
-            document.querySelectorAll('.dropdown-menu').forEach(menu => {
+            document.querySelectorAll('.dropdown-menu.show').forEach(menu => {
                 if (menu !== dropdown) menu.classList.remove('show');
             });
             
@@ -932,26 +1227,20 @@
             const exercise = exercises.find(e => e.id === exerciseId);
             if (!exercise) return;
             
-            // Переключаемся на вкладку тренировок
             document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
             document.querySelectorAll('.tab-content').forEach(tc => tc.classList.remove('active'));
             
             document.querySelector('.tab[data-tab="workouts"]').classList.add('active');
             document.getElementById('workouts-tab').classList.add('active');
             
-            // Устанавливаем выбранное упражнение
             document.getElementById('workout-exercise').value = exerciseId;
             currentSelectedExerciseId = exerciseId;
             updateWorkoutFormFields();
-            
-            // Показываем индикатор выбранного упражнения
-            showExerciseIndicator(exercise.name, exercise.category);
-            
-            // Загружаем историю тренировок для этого упражнения
             loadExerciseHistory();
             
-            // Прокручиваем к форме
-            document.getElementById('workout-form-card').scrollIntoView({ behavior: 'smooth' });
+            setTimeout(() => {
+                document.getElementById('workout-form-card').scrollIntoView({ behavior: 'smooth' });
+            }, 100);
         }
 
         // Показать индикатор выбранного упражнения
@@ -968,11 +1257,10 @@
 
         // Обновление полей формы тренировки
         function updateWorkoutFormFields() {
-            const exerciseId = currentSelectedExerciseId;
+            const exerciseId = currentSelectedExerciseId || parseInt(document.getElementById('workout-exercise').value);
             const exercise = exercises.find(e => e.id === exerciseId);
             
             if (exercise) {
-                // Показываем индикатор выбранного упражнения
                 showExerciseIndicator(exercise.name, exercise.category);
                 
                 if (exercise.category === 'Кардио') {
@@ -982,6 +1270,8 @@
                     document.getElementById('standard-fields').classList.remove('hidden-field');
                     document.getElementById('cardio-fields').classList.add('hidden-field');
                 }
+            } else {
+                hideExerciseIndicator();
             }
         }
 
@@ -1007,16 +1297,14 @@
             exercises.push(exercise);
             localStorage.setItem('workoutDiaryExercises', JSON.stringify(exercises));
             
-            // Обновляем интерфейс
             loadCategories();
             updateExerciseDropdown();
             updateStats();
+            updateWelcomeStats();
             
-            // Очистка формы
             document.getElementById('exercise-name').value = '';
             document.getElementById('exercise-description').value = '';
             
-            // Раскрываем категорию
             expandedCategories.clear();
             expandedCategories.add(category);
             loadCategories();
@@ -1032,7 +1320,6 @@
                 select.innerHTML += `<option value="${ex.id}">${ex.name}</option>`;
             });
             
-            // Устанавливаем выбранное упражнение, если есть
             if (currentSelectedExerciseId) {
                 select.value = currentSelectedExerciseId;
             }
@@ -1061,7 +1348,7 @@
                 exerciseName: exercise.name,
                 exerciseCategory: exercise.category,
                 date: date,
-                difficulty: difficulty
+                difficulty: difficulty || 'средне'
             };
             
             if (exercise.category === 'Кардио') {
@@ -1069,7 +1356,7 @@
                 const distance = document.getElementById('distance').value.trim();
                 const time = document.getElementById('time').value.trim();
                 
-                if (isNaN(level)) {
+                if (isNaN(level) || level <= 0) {
                     showNotification('Заполните поле Уровень', 'error');
                     return;
                 }
@@ -1085,7 +1372,7 @@
                 const reps = parseInt(document.getElementById('reps').value);
                 const sets = parseInt(document.getElementById('sets').value);
                 
-                if (isNaN(weight) || isNaN(reps) || isNaN(sets)) {
+                if (isNaN(weight) || weight <= 0 || isNaN(reps) || reps <= 0 || isNaN(sets) || sets <= 0) {
                     showNotification('Заполните поля Вес, Повторения и Подходы', 'error');
                     return;
                 }
@@ -1101,13 +1388,12 @@
             workouts.push(workoutData);
             localStorage.setItem('workoutDiaryWorkouts', JSON.stringify(workouts));
             
-            // Обновляем интерфейс
             loadCategories();
             updateStats();
+            updateWelcomeStats();
             renderCalendar();
             loadExerciseHistory();
             
-            // Очистка формы
             document.getElementById('weight').value = '';
             document.getElementById('reps').value = '';
             document.getElementById('sets').value = '';
@@ -1116,7 +1402,6 @@
             document.getElementById('time').value = '';
             document.getElementById('difficulty').value = '';
             
-            // Закрываем меню дня
             document.getElementById('selected-day-workouts').innerHTML = '';
             
             showNotification('Тренировка сохранена', 'success');
@@ -1142,7 +1427,7 @@
             const exerciseWorkouts = workouts
                 .filter(w => w.exerciseId === exerciseId)
                 .sort((a, b) => new Date(b.date) - new Date(a.date))
-                .slice(0, 10); // Показываем последние 10 тренировок
+                .slice(0, 10);
             
             if (exerciseWorkouts.length === 0) {
                 container.innerHTML = `
@@ -1229,6 +1514,7 @@
             
             loadCategories();
             updateStats();
+            updateWelcomeStats();
             renderCalendar();
             loadExerciseHistory();
             
@@ -1249,8 +1535,7 @@
                 
                 document.getElementById('exercise-modal').classList.add('active');
                 
-                // Закрываем меню упражнения
-                document.querySelectorAll('.dropdown-menu').forEach(menu => menu.classList.remove('show'));
+                document.querySelectorAll('.dropdown-menu.show').forEach(menu => menu.classList.remove('show'));
             }
         }
 
@@ -1280,7 +1565,6 @@
                     description
                 };
                 
-                // Обновляем категорию во всех связанных тренировках
                 workouts.forEach(workout => {
                     if (workout.exerciseId === id) {
                         workout.exerciseCategory = category;
@@ -1293,6 +1577,7 @@
                 loadCategories();
                 updateExerciseDropdown();
                 updateStats();
+                updateWelcomeStats();
                 loadExerciseHistory();
                 
                 closeExerciseModal();
@@ -1327,7 +1612,6 @@
             if (firstDayOfWeek === 0) firstDayOfWeek = 6;
             else firstDayOfWeek--;
             
-            // Получаем все уникальные даты тренировок
             const workoutDates = new Set();
             workouts.forEach(workout => {
                 const date = new Date(workout.date);
@@ -1400,18 +1684,6 @@
             document.getElementById('workout-date').value = dateString;
             
             document.getElementById('selected-day-workouts').innerHTML = '';
-            
-            // Не показываем уведомление
-        }
-
-        // Форматирование даты для отображения
-        function formatDisplayDate(dateString) {
-            const date = new Date(dateString);
-            return date.toLocaleDateString('ru-RU', {
-                day: 'numeric',
-                month: 'long',
-                year: 'numeric'
-            });
         }
 
         // Показать тренировки за выбранный день
@@ -1496,12 +1768,10 @@
             container.innerHTML = html;
         }
 
-        // Обновление статистики
+        // Обновление статистики для вкладки статистики
         function updateStats() {
-            // Упражнения
             document.getElementById('total-exercises').textContent = exercises.length;
             
-            // Уникальные даты тренировок
             const uniqueDates = new Set();
             workouts.forEach(workout => {
                 const date = new Date(workout.date);
@@ -1510,7 +1780,6 @@
             });
             document.getElementById('total-workouts').textContent = uniqueDates.size;
             
-            // Лучший вес и дата
             const weightWorkouts = workouts.filter(w => w.exerciseCategory !== 'Кардио' && w.weight > 0);
             if (weightWorkouts.length > 0) {
                 const bestWorkout = weightWorkouts.reduce((best, current) => 
@@ -1529,7 +1798,6 @@
                 document.getElementById('best-weight-date').textContent = '-';
             }
             
-            // Последняя тренировка
             if (workouts.length > 0) {
                 const lastWorkout = workouts.sort((a, b) => new Date(b.date) - new Date(a.date))[0];
                 const date = new Date(lastWorkout.date).toLocaleDateString('ru-RU', {
@@ -1537,6 +1805,51 @@
                     month: 'short'
                 });
                 document.getElementById('last-workout').textContent = date;
+            }
+        }
+
+        // Обновление статистики для главной страницы
+        function updateWelcomeStats() {
+            document.getElementById('welcome-total-exercises').textContent = exercises.length;
+            
+            const uniqueDates = new Set();
+            workouts.forEach(workout => {
+                const date = new Date(workout.date);
+                const dateString = formatDateForComparison(date);
+                uniqueDates.add(dateString);
+            });
+            document.getElementById('welcome-total-workouts').textContent = uniqueDates.size;
+            
+            // Тренировки на этой неделе
+            const now = new Date();
+            const startOfWeek = new Date(now);
+            startOfWeek.setDate(now.getDate() - now.getDay() + 1); // Начало недели (понедельник)
+            startOfWeek.setHours(0, 0, 0, 0);
+            
+            const thisWeekWorkouts = workouts.filter(workout => {
+                const workoutDate = new Date(workout.date);
+                return workoutDate >= startOfWeek;
+            });
+            
+            const uniqueThisWeekDates = new Set();
+            thisWeekWorkouts.forEach(workout => {
+                const date = new Date(workout.date);
+                const dateString = formatDateForComparison(date);
+                uniqueThisWeekDates.add(dateString);
+            });
+            
+            document.getElementById('welcome-this-week').textContent = uniqueThisWeekDates.size;
+            
+            // Последняя тренировка
+            if (workouts.length > 0) {
+                const lastWorkout = workouts.sort((a, b) => new Date(b.date) - new Date(a.date))[0];
+                const date = new Date(lastWorkout.date).toLocaleDateString('ru-RU', {
+                    day: 'numeric',
+                    month: 'short'
+                });
+                document.getElementById('welcome-last-workout').textContent = date;
+            } else {
+                document.getElementById('welcome-last-workout').textContent = '-';
             }
         }
 
@@ -1591,6 +1904,7 @@
                 loadCategories();
                 updateExerciseDropdown();
                 updateStats();
+                updateWelcomeStats();
                 renderCalendar();
                 loadExerciseHistory();
                 
@@ -1680,6 +1994,7 @@
             
             loadCategories();
             updateExerciseDropdown();
+            updateWelcomeStats();
         }
     </script>
 </body>

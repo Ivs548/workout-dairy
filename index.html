@@ -752,30 +752,9 @@
     
     <!-- 4. Контент вкладок (под кнопками навигации) -->
     
-    <!-- Главная страница - ОСТАВЛЯЕМ ТОЛЬКО СТАТИСТИКУ -->
+    <!-- Главная страница - ПУСТАЯ, ТОЛЬКО ДЛЯ НАВИГАЦИИ -->
     <div class="tab-content active" id="home-tab">
-        <div class="form-card">
-            <h2><i class="fas fa-chart-bar"></i> Краткая статистика</h2>
-            
-            <div class="stats-grid">
-                <div class="stat-card-compact">
-                    <div class="stat-value-compact" id="welcome-total-exercises">0</div>
-                    <div class="stat-label-compact">Всего упражнений</div>
-                </div>
-                <div class="stat-card-compact">
-                    <div class="stat-value-compact" id="welcome-total-workouts">0</div>
-                    <div class="stat-label-compact">Тренировок</div>
-                </div>
-                <div class="stat-card-compact">
-                    <div class="stat-value-compact" id="welcome-this-week">0</div>
-                    <div class="stat-label-compact">На этой неделе</div>
-                </div>
-                <div class="stat-card-compact">
-                    <div class="stat-value-compact" id="welcome-last-workout">-</div>
-                    <div class="stat-label-compact">Последняя тренировка</div>
-                </div>
-            </div>
-        </div>
+        <!-- Главная страница пустая, можно использовать для быстрого доступа или подсказок -->
     </div>
     
     <!-- Вкладка каталога упражнений -->
@@ -873,21 +852,28 @@
             
             <div class="stats-grid">
                 <div class="stat-card-compact">
-                    <div class="stat-value-compact" id="total-exercises">0</div>
-                    <div class="stat-label-compact">Упражнений</div>
-                </div>
-                <div class="stat-card-compact">
                     <div class="stat-value-compact" id="total-workouts">0</div>
                     <div class="stat-label-compact">Тренировок</div>
                 </div>
                 <div class="stat-card-compact">
-                    <div class="stat-value-compact" id="best-weight">0</div>
-                    <div class="stat-label-compact">Лучший вес (кг)</div>
-                    <div class="stat-date" id="best-weight-date">-</div>
+                    <div class="stat-value-compact" id="this-week">0</div>
+                    <div class="stat-label-compact">На этой неделе</div>
                 </div>
                 <div class="stat-card-compact">
-                    <div class="stat-value-compact" id="last-workout">-</div>
-                    <div class="stat-label-compact">Последняя тренировка</div>
+                    <div class="stat-value-compact" id="total-distance">0</div>
+                    <div class="stat-label-compact">Км (кардио)</div>
+                </div>
+                <div class="stat-card-compact">
+                    <div class="stat-value-compact" id="best-arms-back">0</div>
+                    <div class="stat-label-compact">Руки и спина (кг)</div>
+                </div>
+                <div class="stat-card-compact">
+                    <div class="stat-value-compact" id="best-legs">0</div>
+                    <div class="stat-label-compact">Ноги и ягодицы (кг)</div>
+                </div>
+                <div class="stat-card-compact">
+                    <div class="stat-value-compact" id="best-chest">0</div>
+                    <div class="stat-label-compact">Грудь и пресс (кг)</div>
                 </div>
             </div>
         </div>
@@ -995,8 +981,7 @@
             // Загружаем данные
             loadCategories();
             updateExerciseDropdown();
-            updateStats();
-            updateWelcomeStats();
+            updateStats(); // Обновляем статистику
             
             // Инициализируем календарь
             initCalendar();
@@ -1043,9 +1028,9 @@
                         tabContent.classList.add('active');
                     }
                     
-                    // Обновляем статистику для главной страницы
-                    if (tabId === 'home') {
-                        updateWelcomeStats();
+                    // Обновляем статистику при открытии вкладки статистики
+                    if (tabId === 'stats') {
+                        updateStats();
                     }
                     
                     // Загружаем историю тренировок при открытии вкладки тренировок
@@ -1362,8 +1347,7 @@
             
             loadCategories();
             updateExerciseDropdown();
-            updateStats();
-            updateWelcomeStats();
+            updateStats(); // Обновляем статистику
             
             nameInput.value = '';
             if (descriptionTextarea) {
@@ -1481,8 +1465,7 @@
             localStorage.setItem('workoutDiaryWorkouts', JSON.stringify(workouts));
             
             loadCategories();
-            updateStats();
-            updateWelcomeStats();
+            updateStats(); // Обновляем статистику
             renderCalendar();
             loadExerciseHistory();
             
@@ -1616,8 +1599,7 @@
             localStorage.setItem('workoutDiaryWorkouts', JSON.stringify(workouts));
             
             loadCategories();
-            updateStats();
-            updateWelcomeStats();
+            updateStats(); // Обновляем статистику
             renderCalendar();
             loadExerciseHistory();
             
@@ -1703,8 +1685,7 @@
                 
                 loadCategories();
                 updateExerciseDropdown();
-                updateStats();
-                updateWelcomeStats();
+                updateStats(); // Обновляем статистику
                 loadExerciseHistory();
                 
                 closeExerciseModal();
@@ -1911,110 +1892,82 @@
 
         // Обновление статистики для вкладки статистики
         function updateStats() {
-            const totalExercisesElem = document.getElementById('total-exercises');
+            // 1. Количество тренировок (уникальные даты)
             const totalWorkoutsElem = document.getElementById('total-workouts');
-            const bestWeightElem = document.getElementById('best-weight');
-            const bestWeightDateElem = document.getElementById('best-weight-date');
-            const lastWorkoutElem = document.getElementById('last-workout');
-            
-            if (!totalExercisesElem || !totalWorkoutsElem) return;
-            
-            totalExercisesElem.textContent = exercises.length;
-            
-            const uniqueDates = new Set();
-            workouts.forEach(workout => {
-                const date = new Date(workout.date);
-                const dateString = formatDateForComparison(date);
-                uniqueDates.add(dateString);
-            });
-            totalWorkoutsElem.textContent = uniqueDates.size;
-            
-            const weightWorkouts = workouts.filter(w => w.exerciseCategory !== 'Кардио' && w.weight > 0);
-            if (weightWorkouts.length > 0) {
-                const bestWorkout = weightWorkouts.reduce((best, current) => 
-                    current.weight > best.weight ? current : best
-                );
-                
-                if (bestWeightElem) {
-                    bestWeightElem.textContent = bestWorkout.weight;
-                }
-                
-                if (bestWeightDateElem) {
-                    const date = new Date(bestWorkout.date).toLocaleDateString('ru-RU', {
-                        day: 'numeric',
-                        month: 'short',
-                        year: 'numeric'
-                    });
-                    bestWeightDateElem.textContent = date;
-                }
-            } else {
-                if (bestWeightElem) bestWeightElem.textContent = '0';
-                if (bestWeightDateElem) bestWeightDateElem.textContent = '-';
-            }
-            
-            if (lastWorkoutElem) {
-                if (workouts.length > 0) {
-                    const lastWorkout = workouts.sort((a, b) => new Date(b.date) - new Date(a.date))[0];
-                    const date = new Date(lastWorkout.date).toLocaleDateString('ru-RU', {
-                        day: 'numeric',
-                        month: 'short'
-                    });
-                    lastWorkoutElem.textContent = date;
-                } else {
-                    lastWorkoutElem.textContent = '-';
-                }
-            }
-        }
-
-        // Обновление статистики для главной страницы
-        function updateWelcomeStats() {
-            const welcomeTotalExercises = document.getElementById('welcome-total-exercises');
-            const welcomeTotalWorkouts = document.getElementById('welcome-total-workouts');
-            const welcomeThisWeek = document.getElementById('welcome-this-week');
-            const welcomeLastWorkout = document.getElementById('welcome-last-workout');
-            
-            if (!welcomeTotalExercises || !welcomeTotalWorkouts || !welcomeThisWeek || !welcomeLastWorkout) return;
-            
-            welcomeTotalExercises.textContent = exercises.length;
-            
-            const uniqueDates = new Set();
-            workouts.forEach(workout => {
-                const date = new Date(workout.date);
-                const dateString = formatDateForComparison(date);
-                uniqueDates.add(dateString);
-            });
-            welcomeTotalWorkouts.textContent = uniqueDates.size;
-            
-            // Тренировки на этой неделе
-            const now = new Date();
-            const startOfWeek = new Date(now);
-            startOfWeek.setDate(now.getDate() - now.getDay() + 1);
-            startOfWeek.setHours(0, 0, 0, 0);
-            
-            const thisWeekWorkouts = workouts.filter(workout => {
-                const workoutDate = new Date(workout.date);
-                return workoutDate >= startOfWeek;
-            });
-            
-            const uniqueThisWeekDates = new Set();
-            thisWeekWorkouts.forEach(workout => {
-                const date = new Date(workout.date);
-                const dateString = formatDateForComparison(date);
-                uniqueThisWeekDates.add(dateString);
-            });
-            
-            welcomeThisWeek.textContent = uniqueThisWeekDates.size;
-            
-            // Последняя тренировка
-            if (workouts.length > 0) {
-                const lastWorkout = workouts.sort((a, b) => new Date(b.date) - new Date(a.date))[0];
-                const date = new Date(lastWorkout.date).toLocaleDateString('ru-RU', {
-                    day: 'numeric',
-                    month: 'short'
+            if (totalWorkoutsElem) {
+                const uniqueDates = new Set();
+                workouts.forEach(workout => {
+                    const date = new Date(workout.date);
+                    const dateString = formatDateForComparison(date);
+                    uniqueDates.add(dateString);
                 });
-                welcomeLastWorkout.textContent = date;
-            } else {
-                welcomeLastWorkout.textContent = '-';
+                totalWorkoutsElem.textContent = uniqueDates.size;
+            }
+            
+            // 2. Тренировки на этой неделе
+            const thisWeekElem = document.getElementById('this-week');
+            if (thisWeekElem) {
+                const now = new Date();
+                const startOfWeek = new Date(now);
+                startOfWeek.setDate(now.getDate() - now.getDay() + 1); // Понедельник
+                startOfWeek.setHours(0, 0, 0, 0);
+                
+                const thisWeekWorkouts = workouts.filter(workout => {
+                    const workoutDate = new Date(workout.date);
+                    return workoutDate >= startOfWeek;
+                });
+                
+                const uniqueThisWeekDates = new Set();
+                thisWeekWorkouts.forEach(workout => {
+                    const date = new Date(workout.date);
+                    const dateString = formatDateForComparison(date);
+                    uniqueThisWeekDates.add(dateString);
+                });
+                
+                thisWeekElem.textContent = uniqueThisWeekDates.size;
+            }
+            
+            // 3. Сумма километров в кардио тренировках
+            const totalDistanceElem = document.getElementById('total-distance');
+            if (totalDistanceElem) {
+                const cardioWorkouts = workouts.filter(w => w.exerciseCategory === 'Кардио' && w.distance);
+                const totalDistance = cardioWorkouts.reduce((sum, workout) => {
+                    return sum + (workout.distance || 0);
+                }, 0);
+                totalDistanceElem.textContent = totalDistance.toFixed(1);
+            }
+            
+            // 4. Лучший вес в категории "Руки и спина"
+            const bestArmsBackElem = document.getElementById('best-arms-back');
+            if (bestArmsBackElem) {
+                const armsBackWorkouts = workouts.filter(w => 
+                    w.exerciseCategory === 'Руки и спина' && w.weight > 0
+                );
+                const bestArmsBack = armsBackWorkouts.length > 0 ? 
+                    Math.max(...armsBackWorkouts.map(w => w.weight)) : 0;
+                bestArmsBackElem.textContent = bestArmsBack.toFixed(1);
+            }
+            
+            // 5. Лучший вес в категории "Ноги и ягодицы"
+            const bestLegsElem = document.getElementById('best-legs');
+            if (bestLegsElem) {
+                const legsWorkouts = workouts.filter(w => 
+                    w.exerciseCategory === 'Ноги и ягодицы' && w.weight > 0
+                );
+                const bestLegs = legsWorkouts.length > 0 ? 
+                    Math.max(...legsWorkouts.map(w => w.weight)) : 0;
+                bestLegsElem.textContent = bestLegs.toFixed(1);
+            }
+            
+            // 6. Лучший вес в категории "Грудь и пресс"
+            const bestChestElem = document.getElementById('best-chest');
+            if (bestChestElem) {
+                const chestWorkouts = workouts.filter(w => 
+                    w.exerciseCategory === 'Грудь и пресс' && w.weight > 0
+                );
+                const bestChest = chestWorkouts.length > 0 ? 
+                    Math.max(...chestWorkouts.map(w => w.weight)) : 0;
+                bestChestElem.textContent = bestChest.toFixed(1);
             }
         }
 
@@ -2068,8 +2021,7 @@
                 
                 loadCategories();
                 updateExerciseDropdown();
-                updateStats();
-                updateWelcomeStats();
+                updateStats(); // Обновляем статистику
                 renderCalendar();
                 loadExerciseHistory();
                 
@@ -2160,7 +2112,7 @@
             
             loadCategories();
             updateExerciseDropdown();
-            updateWelcomeStats();
+            updateStats(); // Обновляем статистику
         }
     </script>
 </body>

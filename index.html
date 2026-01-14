@@ -752,11 +752,10 @@
     
     <!-- 4. Контент вкладок (под кнопками навигации) -->
     
-    <!-- Главная страница -->
+    <!-- Главная страница - ОСТАВЛЯЕМ ТОЛЬКО СТАТИСТИКУ -->
     <div class="tab-content active" id="home-tab">
         <div class="form-card">
-            <h2><i class="fas fa-home"></i> Добро пожаловать в Дневник тренировок</h2>
-            <p style="margin-bottom: 15px; color: #7f8c8d;">Здесь вы можете отслеживать свои тренировки, добавлять упражнения и анализировать прогресс.</p>
+            <h2><i class="fas fa-chart-bar"></i> Краткая статистика</h2>
             
             <div class="stats-grid">
                 <div class="stat-card-compact">
@@ -888,7 +887,7 @@
                 </div>
                 <div class="stat-card-compact">
                     <div class="stat-value-compact" id="last-workout">-</div>
-                    <div class="stat-label-compact">Последняя</div>
+                    <div class="stat-label-compact">Последняя тренировка</div>
                 </div>
             </div>
         </div>
@@ -988,7 +987,10 @@
             // Устанавливаем сегодняшнюю дату
             const today = new Date();
             const todayString = formatDateForInput(today);
-            document.getElementById('workout-date').value = todayString;
+            const workoutDateInput = document.getElementById('workout-date');
+            if (workoutDateInput) {
+                workoutDateInput.value = todayString;
+            }
             
             // Загружаем данные
             loadCategories();
@@ -1036,7 +1038,10 @@
                     document.querySelectorAll('.tab-content').forEach(tc => tc.classList.remove('active'));
                     
                     this.classList.add('active');
-                    document.getElementById(`${tabId}-tab`).classList.add('active');
+                    const tabContent = document.getElementById(`${tabId}-tab`);
+                    if (tabContent) {
+                        tabContent.classList.add('active');
+                    }
                     
                     // Обновляем статистику для главной страницы
                     if (tabId === 'home') {
@@ -1051,42 +1056,60 @@
             });
             
             // Форма редактирования упражнения
-            document.getElementById('edit-exercise-form').addEventListener('submit', function(e) {
-                e.preventDefault();
-                saveExerciseChanges();
-            });
+            const editForm = document.getElementById('edit-exercise-form');
+            if (editForm) {
+                editForm.addEventListener('submit', function(e) {
+                    e.preventDefault();
+                    saveExerciseChanges();
+                });
+            }
             
             // Навигация календаря
-            document.getElementById('prev-month').addEventListener('click', () => {
-                currentCalendarDate.setMonth(currentCalendarDate.getMonth() - 1);
-                renderCalendar();
-            });
+            const prevMonthBtn = document.getElementById('prev-month');
+            const nextMonthBtn = document.getElementById('next-month');
             
-            document.getElementById('next-month').addEventListener('click', () => {
-                currentCalendarDate.setMonth(currentCalendarDate.getMonth() + 1);
-                renderCalendar();
-            });
+            if (prevMonthBtn) {
+                prevMonthBtn.addEventListener('click', () => {
+                    currentCalendarDate.setMonth(currentCalendarDate.getMonth() - 1);
+                    renderCalendar();
+                });
+            }
+            
+            if (nextMonthBtn) {
+                nextMonthBtn.addEventListener('click', () => {
+                    currentCalendarDate.setMonth(currentCalendarDate.getMonth() + 1);
+                    renderCalendar();
+                });
+            }
             
             // Изменение категории в форме тренировки
-            document.getElementById('workout-exercise').addEventListener('change', function() {
-                const exerciseId = parseInt(this.value);
-                if (exerciseId) {
-                    currentSelectedExerciseId = exerciseId;
-                    updateWorkoutFormFields();
-                    loadExerciseHistory();
-                } else {
-                    currentSelectedExerciseId = null;
-                    hideExerciseIndicator();
-                }
-            });
+            const workoutExerciseSelect = document.getElementById('workout-exercise');
+            if (workoutExerciseSelect) {
+                workoutExerciseSelect.addEventListener('change', function() {
+                    const exerciseId = parseInt(this.value);
+                    if (exerciseId) {
+                        currentSelectedExerciseId = exerciseId;
+                        updateWorkoutFormFields();
+                        loadExerciseHistory();
+                    } else {
+                        currentSelectedExerciseId = null;
+                        hideExerciseIndicator();
+                    }
+                });
+            }
             
             // Закрытие модального окна
-            document.getElementById('close-modal').addEventListener('click', closeExerciseModal);
+            const closeModalBtn = document.getElementById('close-modal');
+            if (closeModalBtn) {
+                closeModalBtn.addEventListener('click', closeExerciseModal);
+            }
         }
 
         // Загрузка категорий
         function loadCategories() {
             const container = document.getElementById('categories-container');
+            if (!container) return;
+            
             container.innerHTML = '';
             
             categories.forEach(category => {
@@ -1230,45 +1253,79 @@
             document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
             document.querySelectorAll('.tab-content').forEach(tc => tc.classList.remove('active'));
             
-            document.querySelector('.tab[data-tab="workouts"]').classList.add('active');
-            document.getElementById('workouts-tab').classList.add('active');
+            const workoutsTab = document.querySelector('.tab[data-tab="workouts"]');
+            const workoutsTabContent = document.getElementById('workouts-tab');
             
-            document.getElementById('workout-exercise').value = exerciseId;
+            if (workoutsTab && workoutsTabContent) {
+                workoutsTab.classList.add('active');
+                workoutsTabContent.classList.add('active');
+            }
+            
+            const workoutExerciseSelect = document.getElementById('workout-exercise');
+            if (workoutExerciseSelect) {
+                workoutExerciseSelect.value = exerciseId;
+            }
+            
             currentSelectedExerciseId = exerciseId;
             updateWorkoutFormFields();
             loadExerciseHistory();
             
             setTimeout(() => {
-                document.getElementById('workout-form-card').scrollIntoView({ behavior: 'smooth' });
+                const workoutFormCard = document.getElementById('workout-form-card');
+                if (workoutFormCard) {
+                    workoutFormCard.scrollIntoView({ behavior: 'smooth' });
+                }
             }, 100);
         }
 
         // Показать индикатор выбранного упражнения
         function showExerciseIndicator(name, category) {
-            document.getElementById('selected-exercise-name').textContent = name;
-            document.getElementById('selected-exercise-category').textContent = category;
-            document.getElementById('selected-exercise-indicator').style.display = 'block';
+            const indicator = document.getElementById('selected-exercise-indicator');
+            const nameElement = document.getElementById('selected-exercise-name');
+            const categoryElement = document.getElementById('selected-exercise-category');
+            
+            if (indicator && nameElement && categoryElement) {
+                nameElement.textContent = name;
+                categoryElement.textContent = category;
+                indicator.style.display = 'block';
+            }
         }
 
         // Скрыть индикатор выбранного упражнения
         function hideExerciseIndicator() {
-            document.getElementById('selected-exercise-indicator').style.display = 'none';
+            const indicator = document.getElementById('selected-exercise-indicator');
+            if (indicator) {
+                indicator.style.display = 'none';
+            }
         }
 
         // Обновление полей формы тренировки
         function updateWorkoutFormFields() {
-            const exerciseId = currentSelectedExerciseId || parseInt(document.getElementById('workout-exercise').value);
-            const exercise = exercises.find(e => e.id === exerciseId);
+            const exerciseId = currentSelectedExerciseId;
+            let selectValue = null;
+            
+            const workoutExerciseSelect = document.getElementById('workout-exercise');
+            if (workoutExerciseSelect) {
+                selectValue = parseInt(workoutExerciseSelect.value);
+            }
+            
+            const finalExerciseId = exerciseId || selectValue;
+            const exercise = exercises.find(e => e.id === finalExerciseId);
             
             if (exercise) {
                 showExerciseIndicator(exercise.name, exercise.category);
                 
-                if (exercise.category === 'Кардио') {
-                    document.getElementById('standard-fields').classList.add('hidden-field');
-                    document.getElementById('cardio-fields').classList.remove('hidden-field');
-                } else {
-                    document.getElementById('standard-fields').classList.remove('hidden-field');
-                    document.getElementById('cardio-fields').classList.add('hidden-field');
+                const standardFields = document.getElementById('standard-fields');
+                const cardioFields = document.getElementById('cardio-fields');
+                
+                if (standardFields && cardioFields) {
+                    if (exercise.category === 'Кардио') {
+                        standardFields.classList.add('hidden-field');
+                        cardioFields.classList.remove('hidden-field');
+                    } else {
+                        standardFields.classList.remove('hidden-field');
+                        cardioFields.classList.add('hidden-field');
+                    }
                 }
             } else {
                 hideExerciseIndicator();
@@ -1277,9 +1334,15 @@
 
         // Добавление упражнения
         function addExercise() {
-            const name = document.getElementById('exercise-name').value.trim();
-            const category = document.getElementById('exercise-category').value;
-            const description = document.getElementById('exercise-description').value.trim();
+            const nameInput = document.getElementById('exercise-name');
+            const categorySelect = document.getElementById('exercise-category');
+            const descriptionTextarea = document.getElementById('exercise-description');
+            
+            if (!nameInput || !categorySelect) return;
+            
+            const name = nameInput.value.trim();
+            const category = categorySelect.value;
+            const description = descriptionTextarea ? descriptionTextarea.value.trim() : '';
             
             if (!name) {
                 showNotification('Введите название упражнения', 'error');
@@ -1302,8 +1365,10 @@
             updateStats();
             updateWelcomeStats();
             
-            document.getElementById('exercise-name').value = '';
-            document.getElementById('exercise-description').value = '';
+            nameInput.value = '';
+            if (descriptionTextarea) {
+                descriptionTextarea.value = '';
+            }
             
             expandedCategories.clear();
             expandedCategories.add(category);
@@ -1315,6 +1380,8 @@
         // Обновление dropdown с упражнениями
         function updateExerciseDropdown() {
             const select = document.getElementById('workout-exercise');
+            if (!select) return;
+            
             select.innerHTML = '<option value="">Выберите упражнение</option>';
             exercises.forEach(ex => {
                 select.innerHTML += `<option value="${ex.id}">${ex.name}</option>`;
@@ -1327,16 +1394,29 @@
 
         // Добавление тренировки
         function addWorkout() {
-            const exerciseId = currentSelectedExerciseId || parseInt(document.getElementById('workout-exercise').value);
-            const date = document.getElementById('workout-date').value;
-            const difficulty = document.getElementById('difficulty').value.trim();
+            const exerciseId = currentSelectedExerciseId;
+            let selectValue = null;
             
-            if (!exerciseId || !date) {
+            const workoutExerciseSelect = document.getElementById('workout-exercise');
+            if (workoutExerciseSelect) {
+                selectValue = parseInt(workoutExerciseSelect.value);
+            }
+            
+            const finalExerciseId = exerciseId || selectValue;
+            const dateInput = document.getElementById('workout-date');
+            const difficultyInput = document.getElementById('difficulty');
+            
+            if (!dateInput) return;
+            
+            const date = dateInput.value;
+            const difficulty = difficultyInput ? difficultyInput.value.trim() : '';
+            
+            if (!finalExerciseId || !date) {
                 showNotification('Выберите упражнение и дату', 'error');
                 return;
             }
             
-            const exercise = exercises.find(e => e.id === exerciseId);
+            const exercise = exercises.find(e => e.id === finalExerciseId);
             if (!exercise) {
                 showNotification('Упражнение не найдено', 'error');
                 return;
@@ -1344,7 +1424,7 @@
             
             let workoutData = {
                 id: Date.now(),
-                exerciseId: exerciseId,
+                exerciseId: finalExerciseId,
                 exerciseName: exercise.name,
                 exerciseCategory: exercise.category,
                 date: date,
@@ -1352,9 +1432,15 @@
             };
             
             if (exercise.category === 'Кардио') {
-                const level = parseFloat(document.getElementById('level').value);
-                const distance = document.getElementById('distance').value.trim();
-                const time = document.getElementById('time').value.trim();
+                const levelInput = document.getElementById('level');
+                const distanceInput = document.getElementById('distance');
+                const timeInput = document.getElementById('time');
+                
+                if (!levelInput) return;
+                
+                const level = parseFloat(levelInput.value);
+                const distance = distanceInput ? distanceInput.value.trim() : '';
+                const time = timeInput ? timeInput.value.trim() : '';
                 
                 if (isNaN(level) || level <= 0) {
                     showNotification('Заполните поле Уровень', 'error');
@@ -1368,9 +1454,15 @@
                 workoutData.reps = 0;
                 workoutData.sets = 0;
             } else {
-                const weight = parseFloat(document.getElementById('weight').value);
-                const reps = parseInt(document.getElementById('reps').value);
-                const sets = parseInt(document.getElementById('sets').value);
+                const weightInput = document.getElementById('weight');
+                const repsInput = document.getElementById('reps');
+                const setsInput = document.getElementById('sets');
+                
+                if (!weightInput || !repsInput || !setsInput) return;
+                
+                const weight = parseFloat(weightInput.value);
+                const reps = parseInt(repsInput.value);
+                const sets = parseInt(setsInput.value);
                 
                 if (isNaN(weight) || weight <= 0 || isNaN(reps) || reps <= 0 || isNaN(sets) || sets <= 0) {
                     showNotification('Заполните поля Вес, Повторения и Подходы', 'error');
@@ -1394,15 +1486,17 @@
             renderCalendar();
             loadExerciseHistory();
             
-            document.getElementById('weight').value = '';
-            document.getElementById('reps').value = '';
-            document.getElementById('sets').value = '';
-            document.getElementById('level').value = '';
-            document.getElementById('distance').value = '';
-            document.getElementById('time').value = '';
-            document.getElementById('difficulty').value = '';
+            // Очистка формы
+            const inputsToClear = ['weight', 'reps', 'sets', 'level', 'distance', 'time', 'difficulty'];
+            inputsToClear.forEach(id => {
+                const input = document.getElementById(id);
+                if (input) input.value = '';
+            });
             
-            document.getElementById('selected-day-workouts').innerHTML = '';
+            const selectedDayWorkouts = document.getElementById('selected-day-workouts');
+            if (selectedDayWorkouts) {
+                selectedDayWorkouts.innerHTML = '';
+            }
             
             showNotification('Тренировка сохранена', 'success');
         }
@@ -1410,22 +1504,31 @@
         // Загрузка истории тренировок для выбранного упражнения
         function loadExerciseHistory() {
             const container = document.getElementById('exercise-history-container');
+            if (!container) return;
             
-            const exerciseId = currentSelectedExerciseId || parseInt(document.getElementById('workout-exercise').value);
+            const exerciseId = currentSelectedExerciseId;
+            let selectValue = null;
             
-            if (!exerciseId) {
+            const workoutExerciseSelect = document.getElementById('workout-exercise');
+            if (workoutExerciseSelect) {
+                selectValue = parseInt(workoutExerciseSelect.value);
+            }
+            
+            const finalExerciseId = exerciseId || selectValue;
+            
+            if (!finalExerciseId) {
                 container.innerHTML = '<p style="text-align: center; color: #7f8c8d;">Выберите упражнение для просмотра истории</p>';
                 return;
             }
             
-            const exercise = exercises.find(e => e.id === exerciseId);
+            const exercise = exercises.find(e => e.id === finalExerciseId);
             if (!exercise) {
                 container.innerHTML = '<p style="text-align: center; color: #7f8c8d;">Упражнение не найдено</p>';
                 return;
             }
             
             const exerciseWorkouts = workouts
-                .filter(w => w.exerciseId === exerciseId)
+                .filter(w => w.exerciseId === finalExerciseId)
                 .sort((a, b) => new Date(b.date) - new Date(a.date))
                 .slice(0, 10);
             
@@ -1518,7 +1621,10 @@
             renderCalendar();
             loadExerciseHistory();
             
-            document.getElementById('selected-day-workouts').innerHTML = '';
+            const selectedDayWorkouts = document.getElementById('selected-day-workouts');
+            if (selectedDayWorkouts) {
+                selectedDayWorkouts.innerHTML = '';
+            }
             
             showNotification('Тренировка удалена', 'success');
         }
@@ -1528,12 +1634,23 @@
             const exercise = exercises.find(e => e.id === id);
             
             if (exercise) {
-                document.getElementById('edit-exercise-id').value = exercise.id;
-                document.getElementById('edit-exercise-name').value = exercise.name;
-                document.getElementById('edit-exercise-category').value = exercise.category;
-                document.getElementById('edit-exercise-description').value = exercise.description || '';
+                const modal = document.getElementById('exercise-modal');
+                const editId = document.getElementById('edit-exercise-id');
+                const editName = document.getElementById('edit-exercise-name');
+                const editCategory = document.getElementById('edit-exercise-category');
+                const editDescription = document.getElementById('edit-exercise-description');
                 
-                document.getElementById('exercise-modal').classList.add('active');
+                if (modal && editId && editName && editCategory) {
+                    editId.value = exercise.id;
+                    editName.value = exercise.name;
+                    editCategory.value = exercise.category;
+                    
+                    if (editDescription) {
+                        editDescription.value = exercise.description || '';
+                    }
+                    
+                    modal.classList.add('active');
+                }
                 
                 document.querySelectorAll('.dropdown-menu.show').forEach(menu => menu.classList.remove('show'));
             }
@@ -1541,15 +1658,25 @@
 
         // Закрытие модального окна упражнения
         function closeExerciseModal() {
-            document.getElementById('exercise-modal').classList.remove('active');
+            const modal = document.getElementById('exercise-modal');
+            if (modal) {
+                modal.classList.remove('active');
+            }
         }
 
         // Сохранение изменений упражнения
         function saveExerciseChanges() {
-            const id = parseInt(document.getElementById('edit-exercise-id').value);
-            const name = document.getElementById('edit-exercise-name').value.trim();
-            const category = document.getElementById('edit-exercise-category').value;
-            const description = document.getElementById('edit-exercise-description').value.trim();
+            const editId = document.getElementById('edit-exercise-id');
+            const editName = document.getElementById('edit-exercise-name');
+            const editCategory = document.getElementById('edit-exercise-category');
+            const editDescription = document.getElementById('edit-exercise-description');
+            
+            if (!editId || !editName || !editCategory) return;
+            
+            const id = parseInt(editId.value);
+            const name = editName.value.trim();
+            const category = editCategory.value;
+            const description = editDescription ? editDescription.value.trim() : '';
             
             if (!name || !category) {
                 showNotification('Заполните название и категорию', 'error');
@@ -1594,6 +1721,8 @@
         function renderCalendar() {
             const calendar = document.getElementById('calendar');
             const title = document.getElementById('calendar-title');
+            
+            if (!calendar || !title) return;
             
             const monthNames = [
                 'Январь', 'Февраль', 'Март', 'Апрель', 'Май', 'Июнь',
@@ -1678,17 +1807,29 @@
             document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
             document.querySelectorAll('.tab-content').forEach(tc => tc.classList.remove('active'));
             
-            document.querySelector('.tab[data-tab="workouts"]').classList.add('active');
-            document.getElementById('workouts-tab').classList.add('active');
+            const workoutsTab = document.querySelector('.tab[data-tab="workouts"]');
+            const workoutsTabContent = document.getElementById('workouts-tab');
             
-            document.getElementById('workout-date').value = dateString;
+            if (workoutsTab && workoutsTabContent) {
+                workoutsTab.classList.add('active');
+                workoutsTabContent.classList.add('active');
+            }
             
-            document.getElementById('selected-day-workouts').innerHTML = '';
+            const workoutDateInput = document.getElementById('workout-date');
+            if (workoutDateInput) {
+                workoutDateInput.value = dateString;
+            }
+            
+            const selectedDayWorkouts = document.getElementById('selected-day-workouts');
+            if (selectedDayWorkouts) {
+                selectedDayWorkouts.innerHTML = '';
+            }
         }
 
         // Показать тренировки за выбранный день
         function showDayWorkouts(date) {
             const container = document.getElementById('selected-day-workouts');
+            if (!container) return;
             
             const dayWorkouts = workouts.filter(w => {
                 const workoutDate = new Date(w.date);
@@ -1770,7 +1911,15 @@
 
         // Обновление статистики для вкладки статистики
         function updateStats() {
-            document.getElementById('total-exercises').textContent = exercises.length;
+            const totalExercisesElem = document.getElementById('total-exercises');
+            const totalWorkoutsElem = document.getElementById('total-workouts');
+            const bestWeightElem = document.getElementById('best-weight');
+            const bestWeightDateElem = document.getElementById('best-weight-date');
+            const lastWorkoutElem = document.getElementById('last-workout');
+            
+            if (!totalExercisesElem || !totalWorkoutsElem) return;
+            
+            totalExercisesElem.textContent = exercises.length;
             
             const uniqueDates = new Set();
             workouts.forEach(workout => {
@@ -1778,39 +1927,55 @@
                 const dateString = formatDateForComparison(date);
                 uniqueDates.add(dateString);
             });
-            document.getElementById('total-workouts').textContent = uniqueDates.size;
+            totalWorkoutsElem.textContent = uniqueDates.size;
             
             const weightWorkouts = workouts.filter(w => w.exerciseCategory !== 'Кардио' && w.weight > 0);
             if (weightWorkouts.length > 0) {
                 const bestWorkout = weightWorkouts.reduce((best, current) => 
                     current.weight > best.weight ? current : best
                 );
-                document.getElementById('best-weight').textContent = bestWorkout.weight;
                 
-                const date = new Date(bestWorkout.date).toLocaleDateString('ru-RU', {
-                    day: 'numeric',
-                    month: 'short',
-                    year: 'numeric'
-                });
-                document.getElementById('best-weight-date').textContent = date;
+                if (bestWeightElem) {
+                    bestWeightElem.textContent = bestWorkout.weight;
+                }
+                
+                if (bestWeightDateElem) {
+                    const date = new Date(bestWorkout.date).toLocaleDateString('ru-RU', {
+                        day: 'numeric',
+                        month: 'short',
+                        year: 'numeric'
+                    });
+                    bestWeightDateElem.textContent = date;
+                }
             } else {
-                document.getElementById('best-weight').textContent = '0';
-                document.getElementById('best-weight-date').textContent = '-';
+                if (bestWeightElem) bestWeightElem.textContent = '0';
+                if (bestWeightDateElem) bestWeightDateElem.textContent = '-';
             }
             
-            if (workouts.length > 0) {
-                const lastWorkout = workouts.sort((a, b) => new Date(b.date) - new Date(a.date))[0];
-                const date = new Date(lastWorkout.date).toLocaleDateString('ru-RU', {
-                    day: 'numeric',
-                    month: 'short'
-                });
-                document.getElementById('last-workout').textContent = date;
+            if (lastWorkoutElem) {
+                if (workouts.length > 0) {
+                    const lastWorkout = workouts.sort((a, b) => new Date(b.date) - new Date(a.date))[0];
+                    const date = new Date(lastWorkout.date).toLocaleDateString('ru-RU', {
+                        day: 'numeric',
+                        month: 'short'
+                    });
+                    lastWorkoutElem.textContent = date;
+                } else {
+                    lastWorkoutElem.textContent = '-';
+                }
             }
         }
 
         // Обновление статистики для главной страницы
         function updateWelcomeStats() {
-            document.getElementById('welcome-total-exercises').textContent = exercises.length;
+            const welcomeTotalExercises = document.getElementById('welcome-total-exercises');
+            const welcomeTotalWorkouts = document.getElementById('welcome-total-workouts');
+            const welcomeThisWeek = document.getElementById('welcome-this-week');
+            const welcomeLastWorkout = document.getElementById('welcome-last-workout');
+            
+            if (!welcomeTotalExercises || !welcomeTotalWorkouts || !welcomeThisWeek || !welcomeLastWorkout) return;
+            
+            welcomeTotalExercises.textContent = exercises.length;
             
             const uniqueDates = new Set();
             workouts.forEach(workout => {
@@ -1818,12 +1983,12 @@
                 const dateString = formatDateForComparison(date);
                 uniqueDates.add(dateString);
             });
-            document.getElementById('welcome-total-workouts').textContent = uniqueDates.size;
+            welcomeTotalWorkouts.textContent = uniqueDates.size;
             
             // Тренировки на этой неделе
             const now = new Date();
             const startOfWeek = new Date(now);
-            startOfWeek.setDate(now.getDate() - now.getDay() + 1); // Начало недели (понедельник)
+            startOfWeek.setDate(now.getDate() - now.getDay() + 1);
             startOfWeek.setHours(0, 0, 0, 0);
             
             const thisWeekWorkouts = workouts.filter(workout => {
@@ -1838,7 +2003,7 @@
                 uniqueThisWeekDates.add(dateString);
             });
             
-            document.getElementById('welcome-this-week').textContent = uniqueThisWeekDates.size;
+            welcomeThisWeek.textContent = uniqueThisWeekDates.size;
             
             // Последняя тренировка
             if (workouts.length > 0) {
@@ -1847,9 +2012,9 @@
                     day: 'numeric',
                     month: 'short'
                 });
-                document.getElementById('welcome-last-workout').textContent = date;
+                welcomeLastWorkout.textContent = date;
             } else {
-                document.getElementById('welcome-last-workout').textContent = '-';
+                welcomeLastWorkout.textContent = '-';
             }
         }
 
@@ -1919,6 +2084,7 @@
         // Обновление информации о резервной копии
         function updateBackupInfo() {
             const backupInfo = document.getElementById('backup-info');
+            if (!backupInfo) return;
             
             if (backupSettings.lastBackup) {
                 const lastBackupDate = new Date(backupSettings.lastBackup);

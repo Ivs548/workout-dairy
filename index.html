@@ -705,7 +705,7 @@
                 <h2 style="margin: 0;">Редактировать тренировку</h2>
                 <button class="close-modal" onclick="closeEditWorkoutModal()">&times;</button>
             </div>
-            <form id="edit-workout-form" onsubmit="saveWorkoutChanges(event)">
+            <form id="edit-workout-form">
                 <input type="hidden" id="edit-workout-id">
                 <input type="hidden" id="edit-workout-category">
                 <div class="form-group">
@@ -768,7 +768,7 @@
                 </div>
                 <div class="form-actions">
                     <button type="button" class="btn-secondary" onclick="closeEditWorkoutModal()" id="cancel-edit-btn">Отмена</button>
-                    <button type="submit" class="btn-primary" id="save-edit-btn">Сохранить</button>
+                    <button type="button" class="btn-primary" onclick="saveWorkoutChanges()" id="save-edit-btn">Сохранить</button>
                 </div>
             </form>
         </div>
@@ -1537,19 +1537,13 @@
             
             // Открываем модальное окно
             document.getElementById('edit-workout-modal').classList.add('active');
-            
-            // Разблокируем кнопки
-            document.getElementById('save-edit-btn').disabled = false;
-            document.getElementById('cancel-edit-btn').disabled = false;
         }
 
         function closeEditWorkoutModal() {
             document.getElementById('edit-workout-modal').classList.remove('active');
         }
 
-        function saveWorkoutChanges(event) {
-            event.preventDefault();
-            
+        function saveWorkoutChanges() {
             const saveBtn = document.getElementById('save-edit-btn');
             const cancelBtn = document.getElementById('cancel-edit-btn');
             
